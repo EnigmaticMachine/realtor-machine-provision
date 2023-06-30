@@ -41,7 +41,7 @@ def generate_batch_of_images(image_path, folder_name):
     parts = image_path.split("/")
     folder_name = parts[3]
 
-    directory_path = f"~/stablediffusion/outputs/{folder_name}"
+    directory_path = f"/root/stablediffusion/outputs/{folder_name}"
 
     # Check if the directory already exists
     if not os.path.exists(directory_path):
@@ -69,7 +69,7 @@ def generate_batch_of_images(image_path, folder_name):
 url = "http://127.0.0.1:7860"
 
 # Specify the directory
-directory = "~/stablediffusion/inputs"
+directory = "/root/stablediffusion/inputs"
 
 # Get list of all files in directory
 files_in_directory = os.listdir(directory)
