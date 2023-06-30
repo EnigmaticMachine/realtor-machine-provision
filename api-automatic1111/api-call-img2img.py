@@ -5,6 +5,7 @@ import base64
 from PIL import Image, PngImagePlugin
 import random
 import os
+import uuid
 
 
 def generate_batch_of_images(image_path, folder_name):
@@ -38,8 +39,18 @@ def generate_batch_of_images(image_path, folder_name):
     response = requests.post(url=f"{url}/sdapi/v1/img2img", json=payload)
     r = response.json()
 
-    parts = image_path.split("/")
-    folder_name = parts[3]
+    # parts = image_path.split("/")
+    # folder_name = parts[3]
+    
+    # Generate a random UUID
+    my_uuid = uuid.uuid4()
+
+    # Convert the UUID to a string
+    my_uuid_str = str(my_uuid)
+
+    # Split the string on the '-' character and take the first part
+    first_part = my_uuid_str.split('-')[0]                              
+    folder_name = first_part
 
     directory_path = f"/root/stable-diffusion-webui/outputs/{folder_name}"
 
