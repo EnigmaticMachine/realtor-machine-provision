@@ -1,90 +1,55 @@
-import json
+# # https://huggingface.co/stabilityai/stable-diffusion-2-depth
+
+import torch
 import requests
-import io
-import base64
-from PIL import Image, PngImagePlugin
-import random
+from PIL import Image
+from diffusers import StableDiffusionDepth2ImgPipeline
+import time
+import requests
 import os
+import argparse
+import json
+import sys
 
 
-def generate_batch_of_images(image_path, folder_name):
-    # Open an image file
-    with Image.open(image_path) as img:
-        # Get image size
-        width, height = img.size
+pipe = StableDiffusionDepth2ImgPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-2-depth",
+    torch_dtype=torch.float16,
+).to("cuda")
 
-    width = width * 1
-    height = height * 1
-
-    with open(image_path, "rb") as image_file:
-        byte_data = image_file.read()
-        input_image_b64 = base64.b64encode(byte_data).decode("utf-8")
-
-    payload = {
-        "init_images": [input_image_b64],
-        "prompt": "modern interior, ikea, interior design magazine, 8k",
-        "negative_prompt": "old",
-        "steps": 40,
-        "seed": 1223,
-        "width": width,
-        "height": height,
-        "save_images": False,
-        "denoising_strength": 0.48,
-        "batch_size": 2,
-        "n_iter": 8,
-        "sampler_index": "DDIM",
-    }
-
-    response = requests.post(url=f"{url}/sdapi/v1/img2img", json=payload)
-    r = response.json()
-
-    parts = image_path.split("/")
-    folder_name = parts[3]
-
-    directory_path = f"/root/stablediffusion/outputs/{folder_name}"
-
-    # Check if the directory already exists
-    if not os.path.exists(directory_path):
-        # Create the directory
-        os.mkdir(directory_path)
-
-    print("response: ", r)
-
-    for i in r["images"]:
-        image = Image.open(io.BytesIO(base64.b64decode(i.split(",", 1)[0])))
-
-        png_payload = {"image": "data:image/png;base64," + i}
-        response2 = requests.post(url=f"{url}/sdapi/v1/png-info", json=png_payload)
-
-        pnginfo = PngImagePlugin.PngInfo()
-        pnginfo.add_text("parameters", response2.json().get("info"))
-
-        random_number = random.randint(1, 100)
-
-        image.save(
-            f"{directory_path}/visualisation_{random_number}.png", pnginfo=pnginfo
-        )
+url = "http://images.cocodataset.org/val2017/000000039769.jpg"
+init_image = Image.open(requests.get(url, stream=True).raw)
 
 
-url = "http://127.0.0.1:7860"
+def make_vizualization(titles):
+    # Directory to save the files
+    save_dir = "/root/stablediffusion/inputs"
 
-# Specify the directory
-directory = "/root/stablediffusion/inputs"
+    file_paths = []
+    print("all links: ", titles)
+    for title in titles:  # json_data['download_links']:
+        print("title ", title)
+        # Extract the file name from the URL
+        local_path = os.path.join(save_dir, title)
+        file_paths.append(local_path)
 
-# Get list of all files in directory
-files_in_directory = os.listdir(directory)
+    for count, file in enumerate(file_paths):
+        init_image = Image.open(file)
 
-# Create a list to store the full paths
-full_paths = []
+        prompt = "modern apartment"
+        n_propmt = "bad, deformed, ugly, bad anotomy"
+        image = pipe(
+            prompt=prompt, image=init_image, negative_prompt=n_propmt, strength=0.9999
+        ).images[0]
+        image.save(f"/root/stablediffusion/outputs/{titles[count]}")
 
-# Loop through all files
-for file in files_in_directory:
-    # Combine the directory path with the filename
-    full_path = os.path.join(directory, file)
-    # Add the full path to the list
-    full_paths.append(full_path)
+        del image
+        torch.cuda.empty_cache()
+        time.sleep(2)
 
-# Enumerate and print the list of full paths
-for i, image_path in enumerate(full_paths):
-    print("image_path", image_path)
-    generate_batch_of_images(image_path=image_path, folder_name=i)
+
+if __name__ == "__main__":
+    titles = json.loads(sys.argv[1])
+    print("sys.argv[1] ", sys.argv[1])
+    print("titles ", titles)
+    make_vizualization(titles)
