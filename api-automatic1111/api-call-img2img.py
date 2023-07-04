@@ -34,14 +34,57 @@ def generate_batch_of_images(image_path, folder_name):
         "batch_size": 2,
         "n_iter": 8,
         "sampler_index": "DDIM",
+        "alwayson_scripts": {
+            "controlnet": {
+                "args": [
+                    {
+                        "input_image": [input_image_b64],
+                        "model": "control_sd15_canny [fef5e48e]",
+                        "control_mode": "My prompt is more important",
+                    }
+                ]
+            }
+        },
     }
 
+    payload = {
+        "init_images": [input_image_b64],
+        "prompt": "modern interior, ikea, interior design magazine, 8k",
+        "steps": 40,
+        "seed": 1223,
+        "width": width,
+        "height": height,
+        "sampler_name": "DDIM",
+        "batch_size": 2,
+        "n_iter": 8,
+        "alwayson_scripts": {
+            "controlnet": {
+                "args": [
+                    {
+                        "module": "canny",
+                        "model": "control_sd15_canny [fef5e48e]",
+                        "control_mode": "My prompt is more important",
+                    }
+                ]
+            }
+        },
+    }
+
+    # payload = {
+    #   "controlnet_module": "canny",
+    #     "controlnet_input_images": [input_image_b64],
+    #     "controlnet_processor_res": 512,
+    #     "controlnet_threshold_a": 100,
+    #     "controlnet_threshold_b": 200
+    # }
+
     response = requests.post(url=f"{url}/sdapi/v1/img2img", json=payload)
+    # response = requests.post(url=f"{url}/controlnet/detect", json=payload)
     r = response.json()
 
     # parts = image_path.split("/")
     # folder_name = parts[3]
-    
+
     # Generate a random UUID
     my_uuid = uuid.uuid4()
 
@@ -49,7 +92,7 @@ def generate_batch_of_images(image_path, folder_name):
     my_uuid_str = str(my_uuid)
 
     # Split the string on the '-' character and take the first part
-    first_part = my_uuid_str.split('-')[0]                              
+    first_part = my_uuid_str.split("-")[0]
     folder_name = first_part
 
     directory_path = f"/root/stable-diffusion-webui/outputs/{folder_name}"
@@ -77,10 +120,10 @@ def generate_batch_of_images(image_path, folder_name):
         )
 
 
-url = "http://127.0.0.1:7860"
+url = "http://127.0.0.1:7861"
 
 # Specify the directory
-directory = "/root/stable-diffusion-webui/inputs"
+directory = "/root/automatic1111/ints"
 
 # Get list of all files in directory
 files_in_directory = os.listdir(directory)
