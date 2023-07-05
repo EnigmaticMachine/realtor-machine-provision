@@ -14,8 +14,9 @@ def generate_batch_of_images(image_path, folder_name):
         # Get image size
         width, height = img.size
 
-    width = width * 1
-    height = height * 1
+    muliply_resolution = 1
+    width = width * muliply_resolution
+    height = height * muliply_resolution
 
     with open(image_path, "rb") as image_file:
         byte_data = image_file.read()
@@ -23,60 +24,30 @@ def generate_batch_of_images(image_path, folder_name):
 
     payload = {
         "init_images": [input_image_b64],
-        "prompt": "modern interior, ikea, interior design magazine, 8k",
-        "negative_prompt": "old",
+        "prompt": "ikea style, Scandinavian interior, product photography, Nikon",
         "steps": 40,
-        "seed": 1223,
+        "seed": 12159,
         "width": width,
         "height": height,
-        "save_images": False,
-        "denoising_strength": 0.48,
-        "batch_size": 2,
-        "n_iter": 8,
-        "sampler_index": "DDIM",
+        "sampler_name": "DPM++ SDE Karras",
+        "batch_size": 1,
+        "n_iter": 3,
+        "cfg_scale": 6,
+        "denoising_strength": 0.65,
         "alwayson_scripts": {
             "controlnet": {
                 "args": [
                     {
-                        "input_image": [input_image_b64],
-                        "model": "control_sd15_canny [fef5e48e]",
-                        "control_mode": "My prompt is more important",
-                    }
-                ]
-            }
-        },
-    }
-
-    payload = {
-        "init_images": [input_image_b64],
-        "prompt": "modern interior, ikea, interior design magazine, 8k",
-        "steps": 40,
-        "seed": 1223,
-        "width": width,
-        "height": height,
-        "sampler_name": "DDIM",
-        "batch_size": 2,
-        "n_iter": 8,
-        "alwayson_scripts": {
-            "controlnet": {
-                "args": [
-                    {
+                        "enabled": True,
                         "module": "canny",
                         "model": "control_sd15_canny [fef5e48e]",
                         "control_mode": "My prompt is more important",
+                        "processor_res": 1024,
                     }
                 ]
             }
         },
     }
-
-    # payload = {
-    #   "controlnet_module": "canny",
-    #     "controlnet_input_images": [input_image_b64],
-    #     "controlnet_processor_res": 512,
-    #     "controlnet_threshold_a": 100,
-    #     "controlnet_threshold_b": 200
-    # }
 
     response = requests.post(url=f"{url}/sdapi/v1/img2img", json=payload)
     # response = requests.post(url=f"{url}/controlnet/detect", json=payload)
@@ -120,7 +91,7 @@ def generate_batch_of_images(image_path, folder_name):
         )
 
 
-url = "http://127.0.0.1:7861"
+url = "http://127.0.0.1:7860"
 
 # Specify the directory
 directory = "/root/automatic1111/ints"
