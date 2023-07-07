@@ -14,9 +14,21 @@ def generate_batch_of_images(image_path, folder_name):
         # Get image size
         width, height = img.size
 
-    muliply_resolution = 1
-    width = width * muliply_resolution
-    height = height * muliply_resolution
+    # Check if either side is greater than 900
+    if max(width, height) > 900:
+        # Calculate scaling factor
+        scale_factor = 900 / max(width, height)
+        width = int(width * scale_factor)
+        height = int(height * scale_factor)
+    else:
+        # If neither side is greater than 900, do nothing
+        scale_factor = 1
+        width = int(width * scale_factor)
+        height = int(height * scale_factor)
+
+    # muliply_resolution = 1
+    # width = width * muliply_resolution
+    # height = height * muliply_resolution
 
     with open(image_path, "rb") as image_file:
         byte_data = image_file.read()
@@ -30,7 +42,7 @@ def generate_batch_of_images(image_path, folder_name):
         "width": width,
         "height": height,
         "sampler_name": "DPM++ SDE Karras",
-        "batch_size": 1,
+        "batch_size": 2,
         "n_iter": 3,
         "cfg_scale": 6,
         "denoising_strength": 0.65,
@@ -94,7 +106,7 @@ def generate_batch_of_images(image_path, folder_name):
 url = "http://127.0.0.1:7860"
 
 # Specify the directory
-directory = "/root/automatic1111/ints"
+directory = "/root/stable-diffusion-webui/inputs"
 
 # Get list of all files in directory
 files_in_directory = os.listdir(directory)
