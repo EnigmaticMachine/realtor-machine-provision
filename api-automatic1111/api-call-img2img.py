@@ -8,6 +8,9 @@ import os
 import uuid
 
 
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+
 def generate_batch_of_images(image_path, folder_name):
     # Open an image file
     with Image.open(image_path) as img:
