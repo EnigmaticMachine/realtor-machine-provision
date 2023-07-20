@@ -6,9 +6,35 @@ from PIL import Image, PngImagePlugin
 import random
 import os
 import uuid
+import time
+
+
+def is_file_ready(filepath, timeout=30, sleep_interval=1):
+    """
+    Check if a file is ready to be read.
+
+    :param filepath: The path of the file to check.
+    :param timeout: The total amount of time to wait for the file to be ready. Default is 30 seconds.
+    :param sleep_interval: The amount of time to wait between checks. Default is 1 second.
+    :return: True if the file is ready, False otherwise.
+    """
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            with open(filepath, "a"):
+                return True
+        except Exception:
+            time.sleep(sleep_interval)
+            print(f"image {filepath} is not ready yet")
+    return False
 
 
 def generate_batch_of_images(image_path, folder_name):
+    if is_file_ready(image_path):
+        generate_batch_of_images(image_path=image_path, folder_name=i)
+    else:
+        print(f"Image at {image_path} not ready all time.")
+
     # Open an image file
     with Image.open(image_path) as img:
         # Get image size
