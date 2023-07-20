@@ -30,11 +30,6 @@ def is_file_ready(filepath, timeout=30, sleep_interval=1):
 
 
 def generate_batch_of_images(image_path, folder_name):
-    if is_file_ready(image_path):
-        generate_batch_of_images(image_path=image_path, folder_name=i)
-    else:
-        print(f"Image at {image_path} not ready all time.")
-
     # Open an image file
     with Image.open(image_path) as img:
         # Get image size
@@ -149,5 +144,10 @@ for file in files_in_directory:
 
 # Enumerate and print the list of full paths
 for i, image_path in enumerate(full_paths):
+    if is_file_ready(image_path):
+        generate_batch_of_images(image_path=image_path, folder_name=i)
+    else:
+        print(f"Image at {image_path} not ready all time.")
     print("image_path", image_path)
-    generate_batch_of_images(image_path=image_path, folder_name=i)
+
+    # generate_batch_of_images(image_path=image_path, folder_name=i)
